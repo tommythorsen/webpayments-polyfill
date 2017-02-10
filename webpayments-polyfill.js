@@ -11,11 +11,25 @@ function PaymentRequest(methodData, details, options) {
     this.methodData = methodData;
     this.details = details;
     this.options = options;
-    this.show = function() {
-        console.log("PaymentRequest.show() called");
+
+    this.paymentRequestId = null;
+    this.shippingAddress = null;
+    this.shippingOption = null;
+    this.shippingType = null;
+
+    this.eventListeners = {};
+    this.addEventListener = function(eventName, callback) {
+        this.eventListeners[eventName] = callback;
+    }
+}
+
+PaymentRequest.prototype = {
+    constructor: PaymentRequest,
+    show: function() {
+        console.log("PaymentRequest.show()");
         var request = JSON.stringify(this);
         return new Promise(function(resolve, reject) {
-            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {request: request},
+            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {show: request},
                 function(response) {
                     if (response.error) {
                         reject(response.error);
@@ -24,11 +38,19 @@ function PaymentRequest(methodData, details, options) {
                     }
                 });
         });
+    },
+    abort: function() {
+        console.log("PaymentRequest.abort()");
+        return new Promise(function(resolve, reject) {
+            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {abort: false},
+                function(response) {
+                    resolve();
+                });
+        });
+    },
+    canMakePayment: function() {
+        return new Promise.resolve(true);
     }
-}
-
-PaymentRequest.prototype = {
-    constructor: PaymentRequest
 };
 
 })(typeof window != 'undefined'
