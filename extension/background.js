@@ -1,29 +1,32 @@
 "use strict";
 
+var activePaymentTab = null;
+
 // The implementation of PaymentRequest.show().
 //
 // BUG: The popup window is not very nice. It might have looked nicer if we
 //      could overlay the payment app selection UI (and the payment app UI
 //      itself) over the merchant page.
 //
-function show(paymentRequest, sendResponse) {
-    console.log("show: " + paymentRequest);
-    // TODO: Handle the case where there is already a pending request
-    pendingPaymentRequest = JSON.parse(paymentRequest);
-    pendingResponseCallback = sendResponse;
+function show(jsonPaymentRequest, sendResponse) {
+    console.log("show: " + jsonPaymentRequest);
+    var paymentRequest = JSON.parse(jsonPaymentRequest);
+
     var identifiers = "";
-    for (var methodData of pendingPaymentRequest.methodData) {
+    for (var methodData of paymentRequest.methodData) {
         for (var supportedMethod of methodData.supportedMethods) {
             if (identifiers) identifiers += ",";
             identifiers += supportedMethod;
         }
     }
+
     var url = "select-payment-app.html";
     if (identifiers) {
         url += "?ids=" + identifiers;
     }
+
     chrome.tabs.create({url: url, active: false}, function(tab) {
-        paymentTab = tab;
+        activePaymentTab = tab;
         chrome.windows.create(
                 {
                     tabId: tab.id,
@@ -41,15 +44,11 @@ function show(paymentRequest, sendResponse) {
 //
 chrome.runtime.onMessageExternal.addListener(function(message, sender, sendResponse) {
     console.log("messageExternal: " + message);
-    if (message.command == "show") {
-        return show(message.param, sendResponse);
-    } else if (message.command == "registerPaymentApp") {
-        return registerPaymentApp(message.param, sendResponse);
-    } else if (message.command == "getRequest") {
-        return getRequest(sendResponse);
-    } else if (message.command == "submitPaymentResponse") {
-        return submitPaymentResponse(message.param, sendResponse);
+    if (message.hasOwnProperty("show")) {
+        return show(message.show, sendResponse);
+    } else if (message.hasOwnProperty("abort")) {
+        return abort(sendResponse);
     } else {
-        sendResponse({to: "webpayments-polyfill.js", error: "Unknown command: " + message.command});
+        sendResponse();
     }
 });

@@ -19,6 +19,6 @@
     ],
 
     "externally_connectable": {
-        "matches": ["https://tommythorsen.github.io/webpayments-polyfill/webpayments-polyfill.js"]
+        "matches": ["https://tommythorsen.github.io/*"]
     }
 }
