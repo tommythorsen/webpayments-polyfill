@@ -31,11 +31,14 @@ PaymentRequest.prototype = {
         return new Promise(function(resolve, reject) {
             chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {show: request},
                 function(response) {
-                    if (response.error) {
-                        reject(response.error);
-                    } else {
+                    console.log("PaymentRequest.show() response: " + response);
+                    /*
+                    if (response.success) {
                         resolve(response.response);
+                    } else {
+                        reject(response.error);
                     }
+                    */
                 });
         });
     },
