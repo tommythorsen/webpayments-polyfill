@@ -23,18 +23,18 @@ function PaymentRequest(methodData, details, options) {
     }
 }
 
-function waitForContentScript() {
-    console.log("waitForContentScript");
+function sendMessage(command, payload) {
+    console.log("sendMessage(" + command + ")");
     return new Promise(function(resolve) {
-        function check() {
-            console.log("check");
-            if (window.hasOwnProperty("__PaymentRequestInternal")) {
-                resolve();
+        window.addEventListener("message", listener = function(event) {
+            if (event.source != window) return;
+            if (event.data.type && event.data.type == "webpayments-polyfill-content") {
+                window.removeEventListener("message", listener);
+                console.log("event: " + JSON.stringify(event));
+                resolve(event.data.payload);
             }
-
-            window.setTimeout(check, 100);
-        }
-        check();
+        }, false);
+        window.postMessage({type: "webpayments-polyfill", command: "show", payload: payload}, "*");
     });
 }
 
@@ -44,9 +44,7 @@ PaymentRequest.prototype = {
         console.log("PaymentRequest.show()");
         var request = JSON.stringify(this);
         return new Promise(function(resolve, reject) {
-            waitForContentScript().then(function() {
-                return window.__PaymentRequestInternal.show(request)
-            })
+            sendMessage("show", request)
             .then(function(response) {
                 console.log("PaymentRequest.show() response: " + response);
                 if (response) {
@@ -60,9 +58,7 @@ PaymentRequest.prototype = {
     abort: function() {
         console.log("PaymentRequest.abort()");
         return new Promise(function(resolve, reject) {
-            waitForContentScript().then(function() {
-                return window.__PaymentRequestInternal.abort()
-            })
+            sendMessage("abort", null)
             .then(function() {
                 resolve();
             });
@@ -70,11 +66,9 @@ PaymentRequest.prototype = {
     },
     canMakePayment: function() {
         return new Promise(function(resolve, reject) {
-            waitForContentScript().then(function() {
-                return window.__PaymentRequestInternal.canMakePayment()
-            })
-            .then(function() {
-                resolve();
+            sendMessage("canMakePayment", null)
+            .then(function(result) {
+                resolve(result);
             });
         });
     }

@@ -1,18 +1,8 @@
-window ['__PaymentRequestInternal'] = {
-    show: function() {
-        console.log("PaymentRequestInternal.show()");
-        var request = JSON.stringify(this);
-        return new Promise(function(resolve) {
-            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {show: request}, resolve);
-        });
-    },
-    abort: function() {
-        console.log("PaymentRequestInternal.abort()");
-        return new Promise(function(resolve) {
-            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {abort: false}, resolve);
+window.addEventListener("message", function(event) {
+    if (event.source != window) return;
+    if (event.data.type && event.data.type == "webpayments-polyfill") {
+        chrome.runtime.sendMessage(event.data, function(payload) {
+            window.postMessage({type: "webpayments-polyfill-content", payload: payload}, "*");
         });
     }
-    canMakePayment: function() {
-        return new Promise.resolve(true);
-    }
-};
+}, false);
