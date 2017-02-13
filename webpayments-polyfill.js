@@ -23,36 +23,60 @@ function PaymentRequest(methodData, details, options) {
     }
 }
 
+function waitForContentScript() {
+    console.log("waitForContentScript");
+    return new Promise(function(resolve) {
+        function check() {
+            console.log("check");
+            if (window.hasOwnProperty("__PaymentRequestInternal")) {
+                resolve();
+            }
+
+            window.setTimeout(check, 100);
+        }
+        check();
+    });
+}
+
 PaymentRequest.prototype = {
     constructor: PaymentRequest,
     show: function() {
         console.log("PaymentRequest.show()");
         var request = JSON.stringify(this);
         return new Promise(function(resolve, reject) {
-            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {show: request},
-                function(response) {
-                    console.log("PaymentRequest.show() response: " + response);
-                    /*
-                    if (response.success) {
-                        resolve(response.response);
-                    } else {
-                        reject(response.error);
-                    }
-                    */
-                });
+            waitForContentScript().then(function() {
+                return window.__PaymentRequestInternal.show(request)
+            })
+            .then(function(response) {
+                console.log("PaymentRequest.show() response: " + response);
+                if (response) {
+                    resolve(response);
+                } else {
+                    reject();
+                }
+            });
         });
     },
     abort: function() {
         console.log("PaymentRequest.abort()");
         return new Promise(function(resolve, reject) {
-            chrome.runtime.sendMessage("iolnngfpnidgodeaeghmnpccfjdhjeej", {abort: false},
-                function(response) {
-                    resolve();
-                });
+            waitForContentScript().then(function() {
+                return window.__PaymentRequestInternal.abort()
+            })
+            .then(function() {
+                resolve();
+            });
         });
     },
     canMakePayment: function() {
-        return new Promise.resolve(true);
+        return new Promise(function(resolve, reject) {
+            waitForContentScript().then(function() {
+                return window.__PaymentRequestInternal.canMakePayment()
+            })
+            .then(function() {
+                resolve();
+            });
+        });
     }
 };
 

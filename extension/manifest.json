@@ -18,7 +18,10 @@
         "storage"
     ],
 
-    "externally_connectable": {
-        "matches": ["https://tommythorsen.github.io/*"]
-    }
+    "content_scripts": [
+        {
+            "matches": ["*://*/*"],
+            "js": ["content.js"]
+        }
+    ]
 }
