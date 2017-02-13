@@ -44,11 +44,11 @@ function show(jsonPaymentRequest, sendResponse) {
 //
 chrome.runtime.onMessageExternal.addListener(function(message, sender, sendResponse) {
     console.log("messageExternal: " + message);
-    if (message.hasOwnProperty("show")) {
-        return show(message.show, sendResponse);
-    } else if (message.hasOwnProperty("abort")) {
+    if (message.command == "show") {
+        return show(message.payload, sendResponse);
+    } else if (message.command = "abort") {
         return abort(sendResponse);
     } else {
-        sendResponse();
+        sendResponse(new TypeError());
     }
 });

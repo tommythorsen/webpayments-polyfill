@@ -47,10 +47,10 @@ PaymentRequest.prototype = {
             sendMessage("show", request)
             .then(function(response) {
                 console.log("PaymentRequest.show() response: " + response);
-                if (response) {
-                    resolve(response);
+                if (response instanceof Error) {
+                    reject(response);
                 } else {
-                    reject();
+                    resolve(response);
                 }
             });
         });
