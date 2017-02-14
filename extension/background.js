@@ -2,50 +2,28 @@
 
 var activePaymentTab = null;
 
-// The implementation of PaymentRequest.show().
-//
-// BUG: The popup window is not very nice. It might have looked nicer if we
-//      could overlay the payment app selection UI (and the payment app UI
-//      itself) over the merchant page.
-//
-function show(jsonPaymentRequest, sendResponse) {
-    console.log("show: " + jsonPaymentRequest);
-    var paymentRequest = JSON.parse(jsonPaymentRequest);
+function getMatchingAppIds(paymentRequest, sendResponse) {
+    paymentRequest = JSON.parse(paymentRequest);
 
-    var identifiers = "";
+    var identifiers = [];
     for (var methodData of paymentRequest.methodData) {
         for (var supportedMethod of methodData.supportedMethods) {
-            if (identifiers) identifiers += ",";
-            identifiers += supportedMethod;
+            if (supportedMethod == "basic-card") {
+                identifiers.push(supportedMethod);
+            }
         }
     }
 
-    var url = "select-payment-app.html";
-    if (identifiers) {
-        url += "?ids=" + identifiers;
-    }
-
-    chrome.tabs.create({url: url, active: false}, function(tab) {
-        activePaymentTab = tab;
-        chrome.windows.create(
-                {
-                    tabId: tab.id,
-                    type: 'popup',
-                    focused: true,
-                    width: 400,
-                    height: 800
-                });
-    });
-    return true;
+    sendResponse(identifiers);
 }
 
 // Message listener for receiving messages from the polyfill functions via
 // content.js.
 //
-chrome.runtime.onMessageExternal.addListener(function(message, sender, sendResponse) {
-    console.log("messageExternal: " + message);
-    if (message.command == "show") {
-        return show(message.payload, sendResponse);
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    console.log("onMessage: " + JSON.stringify(message) + ", sender: " + JSON.stringify(sender));
+    if (message.command == "getMatchingAppIds") {
+        return getMatchingAppIds(message.payload, sendResponse);
     } else if (message.command = "abort") {
         return abort(sendResponse);
     } else {

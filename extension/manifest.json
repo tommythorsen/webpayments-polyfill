@@ -23,5 +23,9 @@
             "matches": ["*://*/*"],
             "js": ["content.js"]
         }
+    ],
+
+    "web_accessible_resources": [
+        "select-payment-app.html", "select-payment-app.js"
     ]
 }

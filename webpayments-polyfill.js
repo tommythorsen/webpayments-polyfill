@@ -47,8 +47,12 @@ PaymentRequest.prototype = {
             sendMessage("show", request)
             .then(function(response) {
                 console.log("PaymentRequest.show() response: " + response);
-                if (response instanceof Error) {
-                    reject(response);
+                if (response.error) {
+                    if (response.error == "NOT_SUPPORTED_ERR") {
+                        reject({ code: DOMException.NOT_SUPPORTED_ERR, name: "NOT_SUPPORTED_ERR" });
+                    } else {
+                        reject(new DOMException());
+                    }
                 } else {
                     resolve(response);
                 }
