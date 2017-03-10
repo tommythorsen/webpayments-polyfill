@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
     <body>
-        <h2>Select payment app</h2>
-        <p id="empty" style="display: none"><i>No matching payment app found</i></p>
+        <h1>Web Payments</h1>
         <div id="apps"></div>
+        <div id="new-basic-card">
+            <form id="basic-card">
+                Cardholder Name:<br>
+                <input type="text" name="cardholdername"><br><br>
+                Card Number:<br>
+                <input type="text" name="cardnumber"><br><br>
+                Expiry Date:<br>
+                <input type="text" name="expirydate"><br><br>
+                Security Code:<br>
+                <input type="text" name="securitycode"><br><br>
+                <input type="checkbox" checked>Store card information<br><br>
+                <input type="submit" value="Pay with card">
+            </form>
+        </div>
         <script src="select-payment-app.js"></script>
     </body>
 </html>

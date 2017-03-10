@@ -1,3 +1,21 @@
+var form = document.getElementById("basic-card");
+form.addEventListener("submit", function() {
+    window.postMessage({
+        type: "select-payment-app",
+        command: "respond",
+        payload: {
+            methodName: "basic-card",
+            details: {
+                cardholderName: form.elements["cardholdername"].value,
+                cardNumber: form.elements["cardnumber"].value,
+                expiryMonth: form.elements["expirydate"].value.substring(0, 2),
+                expiryYear: form.elements["expirydate"].value.substring(3, 5),
+                cardSecurityCode: form.elements["securitycode"].value,
+            }
+        }
+    }, "*");
+});
+
 function appendPaymentApp(paymentApp) {
     var apps = document.getElementById("apps");
     var div = document.createElement("div");
@@ -7,7 +25,7 @@ function appendPaymentApp(paymentApp) {
         '<button style="float: right" id="pay">Pay</button>' +
         '<p>' + paymentApp.start_url + '</p>';
     div.querySelector("#pay").addEventListener('click', function() {
-        location.href = paymentApp.start_url;
+        console.log("click");
     });
     apps.appendChild(div);
 }
@@ -29,8 +47,5 @@ chrome.storage.local.get(null, function(items) {
                 break;
             }
         }
-    }
-    if (!hasApps) {
-        document.getElementById("empty").style.display = "block";
     }
 });

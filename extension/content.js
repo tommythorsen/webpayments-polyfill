@@ -24,7 +24,11 @@ function show(request, sendResponse) {
 // Relay messages from the polyfill to the background script.
 window.addEventListener("message", function(event) {
     if (event.source != window) return;
-    if (event.data.type && event.data.type == "webpayments-polyfill") {
+    if (!event.data.type) return;
+
+    console.log(JSON.stringify(event.data));
+
+    if (event.data.type == "webpayments-polyfill") {
         if (event.data.command == "show") {
             show(event.data.payload, function(response) {
                 window.postMessage({type: "webpayments-polyfill-content", payload: response}, "*");
